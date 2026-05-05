@@ -1,0 +1,78 @@
+﻿{
+    "base_url":  "http://127.0.0.1:8081",
+    "generated_at":  "2026-03-23T00:09:33.2151987+03:00",
+    "health":  "ok",
+    "mailbox_id":  "78600a14-115b-4d83-9d15-8fe5e991b875",
+    "message_id":  "cc624ade-5509-4d06-85a9-4ca3d083a93d",
+    "retrieved_count":  1,
+    "latency":  {
+                    "retrieve_ms":  50,
+                    "total_ms":  359
+                },
+    "slo":  {
+                "max_retrieve_ms":  3000,
+                "max_total_ms":  8000,
+                "fail_on_latency_slo":  true
+            },
+    "events":  [
+                   {
+                       "time":  "2026-03-23T00:09:32.9671564+03:00",
+                       "step":  "mailbox_prepare",
+                       "status":  "ok",
+                       "details":  {
+                                       "mailbox_id":  "78600a14-115b-4d83-9d15-8fe5e991b875"
+                                   }
+                   },
+                   {
+                       "time":  "2026-03-23T00:09:33.1148125+03:00",
+                       "step":  "mailbox_create",
+                       "status":  "ok",
+                       "details":  {
+
+                                   }
+                   },
+                   {
+                       "time":  "2026-03-23T00:09:33.1496010+03:00",
+                       "step":  "message_post",
+                       "status":  "ok",
+                       "details":  {
+                                       "message_id":  "cc624ade-5509-4d06-85a9-4ca3d083a93d"
+                                   }
+                   },
+                   {
+                       "time":  "2026-03-23T00:09:33.1978264+03:00",
+                       "step":  "message_retrieve",
+                       "status":  "ok",
+                       "details":  {
+                                       "attempts":  1,
+                                       "retrieved_count":  1
+                                   }
+                   },
+                   {
+                       "time":  "2026-03-23T00:09:33.2051269+03:00",
+                       "step":  "latency_retrieve",
+                       "status":  "ok",
+                       "details":  {
+                                       "slo_ms":  3000,
+                                       "latency_ms":  50
+                                   }
+                   },
+                   {
+                       "time":  "2026-03-23T00:09:33.2151987+03:00",
+                       "step":  "health_check",
+                       "status":  "ok",
+                       "details":  {
+                                       "health":  "ok"
+                                   }
+                   },
+                   {
+                       "time":  "2026-03-23T00:09:33.2151987+03:00",
+                       "step":  "latency_total",
+                       "status":  "ok",
+                       "details":  {
+                                       "slo_ms":  8000,
+                                       "latency_ms":  359
+                                   }
+                   }
+               ]
+}

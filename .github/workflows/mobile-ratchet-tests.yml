@@ -1,0 +1,63 @@
+name: Mobile Ratchet Tests
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "clients/android/**"
+      - "clients/ios/**"
+      - "docs/mobile-ratchet-validation.md"
+      - ".github/workflows/mobile-ratchet-tests.yml"
+  pull_request:
+    paths:
+      - "clients/android/**"
+      - "clients/ios/**"
+      - "docs/mobile-ratchet-validation.md"
+      - ".github/workflows/mobile-ratchet-tests.yml"
+
+concurrency:
+  group: mobile-ratchet-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-instrumented:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: clients/android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.10"
+
+      - name: Run Android instrumented ratchet tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_7
+          script: gradle --no-daemon :simy-security:connectedDebugAndroidTest --stacktrace
+
+  ios-swift-tests:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: clients/ios
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Swift package tests
+        run: swift test -v

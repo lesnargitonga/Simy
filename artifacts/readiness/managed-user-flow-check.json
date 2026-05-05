@@ -1,0 +1,49 @@
+﻿{
+    "generated_at":  "2026-03-23T19:30:40.2816589+03:00",
+    "base_url":  "http://127.0.0.1:8081",
+    "passed":  true,
+    "checks":  [
+                   {
+                       "check":  "health",
+                       "passed":  true,
+                       "details":  "status=ok"
+                   },
+                   {
+                       "check":  "admin_mailbox_create",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "admin_bootstrap",
+                       "passed":  true,
+                       "details":  "role=admin"
+                   },
+                   {
+                       "check":  "managed_user_provision",
+                       "passed":  true,
+                       "details":  "mailbox_id=0d1d73b2-3c58-4b56-80cf-8369110a300d"
+                   },
+                   {
+                       "check":  "managed_user_activate",
+                       "passed":  true,
+                       "details":  "role=user,status=active"
+                   },
+                   {
+                       "check":  "contacts_bidirectional",
+                       "passed":  true,
+                       "details":  "admin\u003c-\u003emanaged"
+                   },
+                   {
+                       "check":  "messages_bidirectional",
+                       "passed":  true,
+                       "details":  "admin_to_managed=True,managed_to_admin=True"
+                   },
+                   {
+                       "check":  "feed_visibility_admin_and_managed",
+                       "passed":  true,
+                       "details":  "admin=True,managed=True"
+                   }
+               ],
+    "admin_mailbox_id":  "4686a5c8-75e5-46c2-bf7d-e5c9c265f0fd",
+    "managed_mailbox_id":  "0d1d73b2-3c58-4b56-80cf-8369110a300d"
+}

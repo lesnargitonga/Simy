@@ -1,0 +1,228 @@
+name: Core And Relay Tests
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "crates/**"
+      - "services/**"
+      - "scripts/**"
+      - "docs/production-readiness.md"
+      - ".github/workflows/core-relay-tests.yml"
+  pull_request:
+    paths:
+      - "crates/**"
+      - "services/**"
+      - "scripts/**"
+      - "docs/production-readiness.md"
+      - ".github/workflows/core-relay-tests.yml"
+
+concurrency:
+  group: core-relay-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust-and-relay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: simy
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      minio:
+        image: bitnami/minio:2025
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+          MINIO_DEFAULT_BUCKETS: simy-media
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --health-cmd "curl -f http://127.0.0.1:9000/minio/health/live || exit 1"
+          --health-interval 15s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      RELAY_BIND_ADDR: 127.0.0.1:8081
+      RELAY_ADMIN_TOKEN: local_ci_admin_token_do_not_use
+      POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:5432/simy
+      REDIS_URL: redis://127.0.0.1:6379
+      RELAY_MIN_TTL_SECONDS: "60"
+      RELAY_DEFAULT_TTL_SECONDS: "604800"
+      RELAY_MAX_TTL_SECONDS: "1209600"
+      RELAY_MAX_CIPHERTEXT_BYTES: "131072"
+      RELAY_REPLAY_TTL_MARGIN_SECONDS: "60"
+      RELAY_CLEANUP_INTERVAL_SECONDS: "60"
+      RELAY_SUBMIT_RATE_LIMIT_PER_MINUTE: "120"
+      RELAY_RETRIEVE_RATE_LIMIT_PER_MINUTE: "120"
+      MEDIA_OBJECT_STORE_ENDPOINT: http://127.0.0.1:9000
+      MEDIA_OBJECT_STORE_CONSOLE: http://127.0.0.1:9001
+      MEDIA_OBJECT_STORE_BUCKET: simy-media
+      MEDIA_OBJECT_STORE_REGION: us-east-1
+      MEDIA_OBJECT_STORE_ACCESS_KEY_ID: minioadmin
+      MEDIA_OBJECT_STORE_SECRET_ACCESS_KEY: minioadmin
+      MEDIA_UPLOAD_INTENT_TTL_SECONDS: "900"
+      MEDIA_ACCESS_GRANT_TTL_SECONDS: "900"
+      MEDIA_DEFAULT_CHUNK_SIZE_BYTES: "262144"
+      MEDIA_MAX_ORIGINAL_SIZE_BYTES: "52428800"
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Preflight checks
+        shell: pwsh
+        run: ./scripts/preflight.ps1 -SkipEnvValidation -EnforceNonDefaultAdminToken
+
+      - name: Production readiness gate
+        shell: pwsh
+        run: ./scripts/production_gate.ps1
+
+      - name: Run workspace tests
+        run: cargo test
+
+      - name: Run ratchet feature tests
+        run: cargo test -p comm-core --features ratchet-store-fs ratchet_store_fs
+
+      - name: Start relay
+        run: |
+          cargo run -p relay > relay.log 2>&1 &
+          echo $! > relay.pid
+
+      - name: Wait for relay health
+        shell: bash
+        run: |
+          for i in {1..40}; do
+            if curl -sf http://127.0.0.1:8081/healthz >/dev/null; then
+              echo "Relay is healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Relay did not become healthy in time"
+          cat relay.log || true
+          exit 1
+
+      - name: Run frontend smoke script
+        shell: pwsh
+        run: |
+          mkdir -p artifacts
+          ./scripts/frontend_smoke.ps1 -BaseUrl http://127.0.0.1:8081 -OutputPath artifacts/frontend-smoke.json
+
+      - name: Run live feature check script
+        shell: pwsh
+        run: |
+          mkdir -p artifacts
+          ./scripts/live_feature_check.ps1 -BaseUrl http://127.0.0.1:8081 -OutputPath artifacts/live-feature-check.json
+
+      - name: Run managed user flow check script
+        shell: pwsh
+        run: |
+          mkdir -p artifacts
+          ./scripts/managed_user_flow_check.ps1 -BaseUrl http://127.0.0.1:8081 -OutputPath artifacts/managed-user-flow-check.json
+
+      - name: Run relay smoke script
+        shell: pwsh
+        run: |
+          mkdir -p artifacts
+          ./scripts/relay_smoke.ps1 -BaseUrl http://127.0.0.1:8081 -OutputPath artifacts/smoke.json | Tee-Object -FilePath artifacts/smoke.log
+
+      - name: Capture health snapshot on failure
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          curl -sS http://127.0.0.1:8081/healthz > artifacts/healthz.json || true
+          cp relay.log artifacts/relay.log 2>/dev/null || true
+
+      - name: Redact sensitive values in artifacts
+        if: always()
+        shell: bash
+        run: |
+          if [ -d artifacts ]; then
+            for file in artifacts/*; do
+              if [ -f "$file" ]; then
+                perl -i -pe 's/(RELAY_ADMIN_TOKEN\s*[=:]\s*)\S+/${1}[REDACTED]/g; s/(MEDIA_OBJECT_STORE_SECRET_ACCESS_KEY\s*[=:]\s*)\S+/${1}[REDACTED]/g; s/(mailbox_token_b64"?\s*[:=]\s*"?)[A-Za-z0-9+\/=._-]+/${1}[REDACTED]/ig; s/(x-mailbox-token"?\s*[:=]\s*"?)[A-Za-z0-9+\/=._-]+/${1}[REDACTED]/ig;' "$file"
+              fi
+            done
+          fi
+
+      - name: Write job summary
+        if: always()
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## Core Relay Run Summary"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Workflow status: ${{ job.status }}"
+
+          if (Test-Path "artifacts/smoke.json") {
+            $smoke = Get-Content "artifacts/smoke.json" -Raw | ConvertFrom-Json
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Smoke health: $($smoke.health)"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Retrieved count: $($smoke.retrieved_count)"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Message id: $($smoke.message_id)"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Retrieve latency ms: $($smoke.latency.retrieve_ms)"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Total latency ms: $($smoke.latency.total_ms)"
+          } else {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Smoke summary: not available"
+          }
+
+          if (Test-Path "artifacts/live-feature-check.json") {
+            $liveFeature = Get-Content "artifacts/live-feature-check.json" -Raw | ConvertFrom-Json
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Live feature check: $(if ($liveFeature.passed) { 'PASS' } else { 'FAIL' })"
+          } else {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Live feature check: not available"
+          }
+
+          if (Test-Path "artifacts/managed-user-flow-check.json") {
+            $managedFlow = Get-Content "artifacts/managed-user-flow-check.json" -Raw | ConvertFrom-Json
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Managed user flow check: $(if ($managedFlow.passed) { 'PASS' } else { 'FAIL' })"
+          } else {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Managed user flow check: not available"
+          }
+
+          if (Test-Path "artifacts/healthz.json") {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "- Health snapshot: captured"
+          }
+
+      - name: Upload failure bundle
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-relay-failure-artifacts
+          path: artifacts
+
+      - name: Stop relay
+        if: always()
+        run: |
+          if [ -f relay.pid ]; then
+            kill "$(cat relay.pid)" || true
+          fi

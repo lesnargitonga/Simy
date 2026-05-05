@@ -1,0 +1,9 @@
+target/
+.env
+.DS_Store
+Thumbs.db
+coverage/
+*.log
+clients/**/node_modules/
+clients/**/dist/
+clients/**/src-tauri/target/

@@ -1,0 +1,39 @@
+[workspace]
+members = [
+    "crates/comm-core",
+    "services/relay",
+]
+exclude = [
+    "clients/desktop/simy-desktop/src-tauri"
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "UNLICENSED"
+rust-version = "1.77"
+version = "0.1.0"
+
+[workspace.dependencies]
+axum = { version = "0.8", features = ["json", "macros"] }
+aws-config = "1.8"
+aws-sdk-s3 = "1.79"
+base64ct = { version = "1.7", features = ["alloc"] }
+chacha20poly1305 = "0.10"
+chrono = { version = "0.4", features = ["clock", "serde"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+hex = "0.4"
+hkdf = "0.12"
+rand_core = { version = "0.6", features = ["getrandom"] }
+redis = { version = "0.32", features = ["tokio-comp"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "macros", "migrate"] }
+thiserror = "2"
+tokio = { version = "1.44", features = ["macros", "rt-multi-thread", "signal", "sync"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+uuid = { version = "1", features = ["serde", "v4"] }
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+zeroize = { version = "1", features = ["zeroize_derive"] }

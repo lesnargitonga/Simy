@@ -1,0 +1,49 @@
+﻿{
+    "generated_at":  "2026-03-23T13:41:46.7477533+03:00",
+    "duration_seconds":  4,
+    "relay_base_url":  "http://127.0.0.1:8081",
+    "operational_readiness":  "Operationally ready for controlled production pilot",
+    "general_availability_decision":  "Not approved for general availability until production-readiness blockers are fully closed",
+    "checks":  [
+                   {
+                       "check":  "production_gate",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "frontend_smoke",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "live_feature_check",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "managed_user_flow_check",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "relay_health",
+                       "passed":  true,
+                       "details":  "ok"
+                   }
+               ],
+    "frontend_smoke_artifact":  "artifacts\\readiness\\frontend-smoke.json",
+    "live_feature_artifact":  "artifacts\\readiness\\live-feature-check.json",
+    "managed_user_flow_artifact":  "artifacts\\readiness\\managed-user-flow-check.json",
+    "relay_health":  {
+                         "status":  "ok",
+                         "server_time":  "2026-03-23T10:41:46.675582100Z",
+                         "postgres":  "ok",
+                         "redis":  "ok"
+                     },
+    "security_blockers":  [
+                              "Independent cryptography and protocol review",
+                              "Reproducible signed releases and verified update chain",
+                              "Complete device trust and revocation lifecycle",
+                              "Incident response and key-compromise runbook exercised"
+                          ]
+}

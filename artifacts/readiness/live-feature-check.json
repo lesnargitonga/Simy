@@ -1,0 +1,69 @@
+﻿{
+    "generated_at":  "2026-03-23T19:17:19.3994121+03:00",
+    "base_url":  "http://127.0.0.1:8081",
+    "passed":  true,
+    "checks":  [
+                   {
+                       "check":  "health",
+                       "passed":  true,
+                       "details":  "status=ok"
+                   },
+                   {
+                       "check":  "admin_mailbox_create",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "admin_bootstrap",
+                       "passed":  true,
+                       "details":  "role=admin"
+                   },
+                   {
+                       "check":  "mailbox_a_create",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "mailbox_b_create",
+                       "passed":  true,
+                       "details":  "ok"
+                   },
+                   {
+                       "check":  "contact_link",
+                       "passed":  true,
+                       "details":  "A-\u003eB linked"
+                   },
+                   {
+                       "check":  "message_round_trip",
+                       "passed":  true,
+                       "details":  "message_id=fff8ba1b-5190-4c27-aefb-cdca0d4e3d68"
+                   },
+                   {
+                       "check":  "feed_post_visible_author",
+                       "passed":  true,
+                       "details":  "post_id=71b083d4-7c80-47cc-8d2e-76e493378b11"
+                   },
+                   {
+                       "check":  "feed_post_visible_recipient",
+                       "passed":  true,
+                       "details":  "post_id=71b083d4-7c80-47cc-8d2e-76e493378b11"
+                   },
+                   {
+                       "check":  "media_upload",
+                       "passed":  true,
+                       "details":  "status=200"
+                   },
+                   {
+                       "check":  "media_manifest",
+                       "passed":  true,
+                       "details":  "object_id=4558132e-40b8-40ea-85d4-5777de88ab2c"
+                   },
+                   {
+                       "check":  "media_download_integrity",
+                       "passed":  true,
+                       "details":  "hash_match=True"
+                   }
+               ],
+    "mailbox_a":  "86352513-e319-4290-ba5d-0e8163c1dba3",
+    "mailbox_b":  "8abb97f3-fb95-41d0-b714-5683114a06b7"
+}

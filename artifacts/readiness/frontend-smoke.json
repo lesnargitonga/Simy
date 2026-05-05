@@ -1,0 +1,57 @@
+﻿{
+    "generated_at":  "2026-03-23T20:37:12.7997183+03:00",
+    "base_url":  "http://127.0.0.1:8081",
+    "passed":  true,
+    "checks":  [
+                   {
+                       "check":  "http_status",
+                       "passed":  true,
+                       "details":  "status=200"
+                   },
+                   {
+                       "check":  "health_status",
+                       "passed":  true,
+                       "details":  "health=ok"
+                   },
+                   {
+                       "check":  "marker:id=\"setup-screen\"",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:id=\"message-list\"",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:id=\"feed-list\"",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:function initializeWorkspace()",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:function sendMessage()",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:function postFeedEntry()",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:function refreshMessages()",
+                       "passed":  true,
+                       "details":  "present"
+                   },
+                   {
+                       "check":  "marker:function refreshFeed()",
+                       "passed":  true,
+                       "details":  "present"
+                   }
+               ]
+}
