@@ -2,6 +2,20 @@
 
 Simy is a defensive rebuild of a privacy-preserving communications platform for high-risk use cases. The repository currently delivers the secure relay and operational foundation first: a Rust workspace, a shared cryptographic core crate, a PostgreSQL-backed relay service, Redis-backed replay and throttle controls, a browser-based secure workspace plus operator console, server-backed account and role records, local infrastructure for development, local object storage for encrypted media blobs, and detailed security documentation.
 
+## Showcase Focus
+
+- Security-first systems design in Rust.
+- Cryptographic protocol foundations for asynchronous secure messaging.
+- Durable relay infrastructure with explicit operational controls and documentation.
+
+## At a Glance
+
+- Shared crypto core for identity material, X3DH, and Double Ratchet foundations.
+- PostgreSQL-backed relay with Redis replay detection and throttling.
+- Browser-based secure workspace and protected operator controls.
+- Managed-user provisioning and server-backed roles.
+- Desktop reference client with encrypted session persistence.
+
 This repository is intentionally opinionated about what it does and does not do.
 
 - It does implement a durable ciphertext relay with mailbox provisioning, retrieval authentication, TTL cleanup, integration-test tooling, hardened local and CI test paths, local media-blob development infrastructure, server-backed admin bootstrap, managed-user provisioning, and a desktop ratchet-persistence reference client.
